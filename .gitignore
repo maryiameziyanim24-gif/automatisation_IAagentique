@@ -16,6 +16,9 @@ env/
 data/uploads/*.pdf
 data/reports/*.pdf
 
+# Reports générés (ne pas versionner)
+reports/generated/*.pdf
+
 # IDE
 .vscode/
 .idea/
