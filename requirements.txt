@@ -1,0 +1,6 @@
+pypdf==4.0.2
+streamlit==1.40.2
+reportlab==4.2.2
+rapidfuzz==3.9.6
+mistralai==1.10.0
+jsonschema==4.22.0
