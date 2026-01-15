@@ -1,11 +1,14 @@
 from __future__ import annotations
 from typing import Dict, Any, List
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
+from reportlab.lib.units import inch
 import os
 import datetime as dt
+import io
+import base64
 
 
 def _p(text: str, styles):
@@ -92,6 +95,49 @@ def build_report(doc: Dict[str, Any], out_dir: str = "reports/generated") -> str
         ("VALIGN", (0,0), (-1,-1), "TOP"),
     ]))
     story.append(tbl)
+    story.append(Spacer(1, 16))
+
+    # Visualisations
+    visualizations = doc.get("visualizations", {})
+    if visualizations and visualizations.get("status") == "generated":
+        story.append(Paragraph("<b>Visualisations</b>", styles["Heading2"]))
+        story.append(Spacer(1, 12))
+        
+        # Nuage de mots
+        if visualizations.get("wordcloud"):
+            try:
+                story.append(Paragraph("<b>Nuage de mots</b>", styles["Heading3"]))
+                img_data = base64.b64decode(visualizations["wordcloud"])
+                img_buffer = io.BytesIO(img_data)
+                img = Image(img_buffer, width=5*inch, height=2.5*inch)
+                story.append(img)
+                story.append(Spacer(1, 12))
+            except Exception as e:
+                story.append(_p(f"Erreur chargement nuage de mots: {str(e)}", styles))
+        
+        # Graphiques statistiques
+        if visualizations.get("statistics"):
+            try:
+                story.append(Paragraph("<b>Statistiques</b>", styles["Heading3"]))
+                img_data = base64.b64decode(visualizations["statistics"])
+                img_buffer = io.BytesIO(img_data)
+                img = Image(img_buffer, width=5*inch, height=2.1*inch)
+                story.append(img)
+                story.append(Spacer(1, 12))
+            except Exception as e:
+                story.append(_p(f"Erreur chargement graphique statistiques: {str(e)}", styles))
+        
+        # Mindmap
+        if visualizations.get("mindmap"):
+            try:
+                story.append(Paragraph("<b>Carte mentale (Mindmap)</b>", styles["Heading3"]))
+                img_data = base64.b64decode(visualizations["mindmap"])
+                img_buffer = io.BytesIO(img_data)
+                img = Image(img_buffer, width=5*inch, height=4*inch)
+                story.append(img)
+                story.append(Spacer(1, 12))
+            except Exception as e:
+                story.append(_p(f"Erreur chargement mindmap: {str(e)}", styles))
 
     # Annexes minimales: références de pages pour quelques points clés
     akp = ver.get("annotated_key_points", [])

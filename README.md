@@ -1,88 +1,83 @@
-# Analyseur multi-agents de PDF (Article, Contrat, Autre)
+﻿#  Analyseur Multi-Agents de Documents PDF
 
-Objectif: application Python complète (UI Streamlit) qui analyse des PDF, détecte le type (article, contrat, autre), extrait des informations clés, synthétise un résumé, vérifie les affirmations (citations/pages) et génère un rapport PDF.
+**Système d'analyse intelligente de documents PDF avec pipeline multi-agents et visualisations automatiques**
 
-## Stack
-- Python 3.10+
-- Streamlit (UI)
-- pypdf (extraction de texte)
-- reportlab (génération PDF)
-- rapidfuzz (appui à la vérification simple)
-- OpenAI (LLM optionnel)
+Analyse automatique de **5 types de documents** : Articles scientifiques, Contrats, CV, Cours et Documents génériques.
 
-## Installation (Windows)
-1) Créer un environnement (recommandé):
+---
+
+##  Fonctionnalités
+
+###  Détection Automatique de Type
+- **Articles scientifiques** : Problématique, méthodes, résultats, conclusion
+- **Contrats** : Parties, dates, montants, obligations
+- **CV** : Expérience, formation, compétences
+- **Cours** : Chapitres, exercices, objectifs pédagogiques
+- **Documents génériques** : Sections, points clés, mots-clés
+
+###  Visualisations Automatiques
+-  **Nuage de mots** : Termes les plus fréquents
+-  **Graphiques statistiques** : Sections et éléments extraits
+-  **Mindmap** : Carte mentale de la structure
+
+###  Pipeline Multi-Agents (7 Agents)
+1. Agent d'Ingestion
+2. Agent de Détection
+3. Agent de Structuration
+4. Agent d'Extraction
+5. Agent de Synthèse
+6. Agent de Vérification
+7. Agent de Visualisation
+
+###  LLM : Mistral AI Cloud
+- Modèles supportés : mistral-small, mistral-medium, mistral-large
+- Performances : ~20-30s par analyse
+- Mode heuristique sans API key
+
+---
+
+##  Installation
+
 ```powershell
+git clone https://github.com/maryiameziyanim24-gif/automatisation_IAagentique.git
+cd automatisation_IAagentique
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-```
-2) Installer les dépendances:
-```powershell
 pip install -r requirements.txt
 ```
 
-3) (Optionnel) Configurer OpenAI pour le LLM
+Configuration Mistral AI (optionnel) :
 ```powershell
-$env:OPENAI_API_KEY = "votre_cle_api"
-# Optionnel: choisir le modèle
-$env:OPENAI_MODEL = "gpt-4o-mini"
+setx MISTRAL_API_KEY "votre_cle"
 ```
 
-## Démarrer l'application
+---
+
+##  Utilisation
+
 ```powershell
 streamlit run app/ui_app.py
 ```
-Puis ouvrir le lien local (ex: http://localhost:8501).
 
-## Organisation
-```
-app/
-  ui_app.py         # UI Streamlit
-  orchestrator.py   # Orchestrateur du pipeline
-  agents/
-    ingestion.py
-    type_detection.py
-    structuration.py
-    extraction.py
-    synthese.py
-    verification.py
-    rapport.py
-data/
-  examples/         # Placez ici quelques PDF d'exemple
-  uploads/          # Fichiers uploadés via l'UI
-reports/
-  generated/        # Rapports PDF générés
-docs/
-  notes.md          # Notes / architecture / limites
-```
+Ouvrir http://localhost:8501
 
-## Flux (pipeline)
-1. Ingestion → extrait le texte par page.
-2. Détection de type → "article_scientifique" / "contrat" / "autre" (heuristiques).
-3. Structuration → sections logiques (titres + contenu).
-4. Extraction → champs clés selon le type (ou générique).
-5. Synthèse → résumé + points clés (+ risques pour contrat).
-6. Vérification → citations (pages) et alertes d'incertitude.
-7. Rapport → PDF via reportlab.
+---
 
-LLM: activable dans la barre latérale (OpenAI). Sans clé, le système fonctionne en heuristique.
+##  Stack Technique
 
-## Option "Forcer le type"
-Dans la barre latérale, vous pouvez forcer le type de document (Article/Contrat/Autre) pour bypasser la détection (utile en démo ou pour comparer).
+- pypdf 4.0.2
+- mistralai 1.10.0
+- reportlab 4.2.2
+- wordcloud 1.9.3
+- matplotlib 3.8.2
+- networkx 3.2.1
+- streamlit 1.40.2
 
-## Évaluation (détection de type)
-Préparez un fichier CSV d’étiquettes (ex: `data/examples/labels_types.csv`).
+---
 
-Lancer l’évaluation sans LLM:
-```powershell
-python scripts/evaluate_types.py data/examples/labels_types.csv
-```
-Avec LLM activé:
-```powershell
-python scripts/evaluate_types.py data/examples/labels_types.csv --llm
-```
+##  Auteur
 
-## Remarques
-- Cette version fonctionne sans clé LLM (heuristiques). Vous pouvez brancher un LLM plus tard.
-- Les PDF scannés (images) ne sont pas gérés (pas d'OCR).
-- Les heuristiques sont volontairement simples pour rester robustes en démo.
+**Maryame Ziyani**
+- GitHub: [@maryiameziyanim24-gif](https://github.com/maryiameziyanim24-gif)
+
+ N'hésitez pas à laisser une étoile sur GitHub !

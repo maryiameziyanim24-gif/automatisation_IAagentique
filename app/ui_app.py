@@ -10,6 +10,7 @@ for p in (ROOT,):
 
 import io
 import time
+import base64
 import streamlit as st
 from typing import List
 
@@ -118,16 +119,168 @@ if run_btn and uploaded_files:
             else:
                 st.info("Aucune alerte majeure détectée (heuristique).")
 
-        # Télécharger rapport
+        # Visualisations
+        visualizations = doc.get("visualizations", {})
+        if visualizations and visualizations.get("status") == "generated":
+            with st.expander("📊 Visualisations (Graphiques, Nuages de Mots, Mindmap)", expanded=False):
+                st.markdown("### Visualisations Générées")
+                
+                # Nuage de mots
+                if visualizations.get("wordcloud"):
+                    st.markdown("#### ☁️ Nuage de Mots")
+                    st.image(f"data:image/png;base64,{visualizations['wordcloud']}", use_container_width=True)
+                    st.caption("Visualisation des mots les plus fréquents dans le document")
+                    st.divider()
+                
+                # Graphiques statistiques
+                if visualizations.get("statistics"):
+                    st.markdown("#### 📈 Statistiques")
+                    st.image(f"data:image/png;base64,{visualizations['statistics']}", use_container_width=True)
+                    st.caption("Analyse statistique du contenu extrait")
+                    st.divider()
+                
+                # Mindmap
+                if visualizations.get("mindmap"):
+                    st.markdown("#### 🧠 Carte Mentale (Mindmap)")
+                    st.image(f"data:image/png;base64,{visualizations['mindmap']}", use_container_width=True)
+                    st.caption("Structure logique du document")
+        elif visualizations and visualizations.get("status") == "unavailable":
+            with st.expander("📊 Visualisations", expanded=False):
+                st.warning("⚠️ Visualisations indisponibles. Installez les dépendances: `pip install wordcloud matplotlib networkx`")
+
+
+        # Détails des agents
+        with st.expander("🔍 Détails des Agents (Pipeline)", expanded=False):
+            st.markdown("### Pipeline d'analyse multi-agents")
+            st.caption("Visualisez le travail de chaque agent dans le processus d'analyse")
+            
+            agent_details = doc.get("agent_details", {})
+            
+            # Agent 1: Ingestion
+            with st.container():
+                col1, col2 = st.columns([1, 5])
+                with col1:
+                    st.markdown(f"### {agent_details.get('ingestion', {}).get('status', '⏳')}")
+                with col2:
+                    st.markdown("#### 1️⃣ Agent d'Ingestion")
+                    st.write(f"**Rôle**: Extraire le texte brut du PDF page par page")
+                    st.write(f"**Résultat**: {agent_details.get('ingestion', {}).get('description', 'N/A')}")
+                st.divider()
+            
+            # Agent 2: Détection
+            with st.container():
+                col1, col2 = st.columns([1, 5])
+                with col1:
+                    st.markdown(f"### {agent_details.get('detection', {}).get('status', '⏳')}")
+                with col2:
+                    st.markdown("#### 2️⃣ Agent de Détection")
+                    st.write(f"**Rôle**: Identifier le type de document (article, contrat, CV, cours, autre)")
+                    st.write(f"**Résultat**: {agent_details.get('detection', {}).get('description', 'N/A')}")
+                    det_data = agent_details.get('detection', {}).get('data', {})
+                    if det_data:
+                        st.json(det_data)
+                st.divider()
+            
+            # Agent 3: Structuration
+            with st.container():
+                col1, col2 = st.columns([1, 5])
+                with col1:
+                    st.markdown(f"### {agent_details.get('structuration', {}).get('status', '⏳')}")
+                with col2:
+                    st.markdown("#### 3️⃣ Agent de Structuration")
+                    st.write(f"**Rôle**: Segmenter le document en sections logiques")
+                    st.write(f"**Résultat**: {agent_details.get('structuration', {}).get('description', 'N/A')}")
+                    struct_data = agent_details.get('structuration', {}).get('data', {})
+                    if struct_data.get('sections'):
+                        st.write("**Sections identifiées**:")
+                        for i, section in enumerate(struct_data['sections'][:10], 1):
+                            st.write(f"{i}. {section}")
+                        if len(struct_data['sections']) > 10:
+                            st.caption(f"... et {len(struct_data['sections']) - 10} autres sections")
+                st.divider()
+            
+            # Agent 4: Extraction
+            with st.container():
+                col1, col2 = st.columns([1, 5])
+                with col1:
+                    st.markdown(f"### {agent_details.get('extraction', {}).get('status', '⏳')}")
+                with col2:
+                    st.markdown("#### 4️⃣ Agent d'Extraction")
+                    st.write(f"**Rôle**: Extraire les informations structurées selon le type de document")
+                    st.write(f"**Résultat**: {agent_details.get('extraction', {}).get('description', 'N/A')}")
+                    ext_data = agent_details.get('extraction', {}).get('data', {})
+                    if ext_data.get('fields'):
+                        st.write("**Champs extraits**:", ", ".join(ext_data['fields']))
+                        st.caption(f"Méthode: {ext_data.get('method', 'N/A')}")
+                st.divider()
+            
+            # Agent 5: Synthèse
+            with st.container():
+                col1, col2 = st.columns([1, 5])
+                with col1:
+                    st.markdown(f"### {agent_details.get('synthese', {}).get('status', '⏳')}")
+                with col2:
+                    st.markdown("#### 5️⃣ Agent de Synthèse")
+                    st.write(f"**Rôle**: Générer un résumé exécutif et identifier les points clés")
+                    st.write(f"**Résultat**: {agent_details.get('synthese', {}).get('description', 'N/A')}")
+                    synth_data = agent_details.get('synthese', {}).get('data', {})
+                    if synth_data:
+                        st.caption(f"Longueur résumé: {synth_data.get('summary_length', 0)} caractères")
+                        st.caption(f"Méthode: {synth_data.get('method', 'N/A')}")
+                st.divider()
+            
+            # Agent 6: Vérification
+            with st.container():
+                col1, col2 = st.columns([1, 5])
+                with col1:
+                    st.markdown(f"### {agent_details.get('verification', {}).get('status', '⏳')}")
+                with col2:
+                    st.markdown("#### 6️⃣ Agent de Vérification")
+                    st.write(f"**Rôle**: Vérifier la cohérence et identifier les anomalies potentielles")
+                    st.write(f"**Résultat**: {agent_details.get('verification', {}).get('description', 'N/A')}")
+                    ver_data = agent_details.get('verification', {}).get('data', {})
+                    if ver_data:
+                        severity = ver_data.get('severity', 'N/A')
+                        if severity == "Haute":
+                            st.error(f"⚠️ Sévérité: {severity}")
+                        else:
+                            st.success(f"✅ Sévérité: {severity}")
+                st.divider()
+            
+            # Agent 7: Visualisation
+            with st.container():
+                col1, col2 = st.columns([1, 5])
+                with col1:
+                    st.markdown(f"### {agent_details.get('visualisation', {}).get('status', '⏳')}")
+                with col2:
+                    st.markdown("#### 7️⃣ Agent de Visualisation")
+                    st.write(f"**Rôle**: Générer des graphiques, nuages de mots et mindmaps")
+                    st.write(f"**Résultat**: {agent_details.get('visualisation', {}).get('description', 'N/A')}")
+                    viz_data = agent_details.get('visualisation', {}).get('data', {})
+                    if viz_data:
+                        st.write(f"- Nuage de mots: {viz_data.get('wordcloud', 'N/A')}")
+                        st.write(f"- Statistiques: {viz_data.get('statistics', 'N/A')}")
+                        st.write(f"- Mindmap: {viz_data.get('mindmap', 'N/A')}")
+
+        # Rapport PDF
         rp = doc["report_path"]
         if os.path.exists(rp):
+            st.markdown("### 📄 Rapport PDF")
+            
             with open(rp, "rb") as f:
-                st.download_button(
-                    label="Télécharger le rapport PDF",
-                    data=f.read(),
-                    file_name=os.path.basename(rp),
-                    mime="application/pdf",
-                )
+                pdf_bytes = f.read()
+            
+            # Bouton pour télécharger
+            st.download_button(
+                label="📥 Télécharger le rapport PDF",
+                data=pdf_bytes,
+                file_name=os.path.basename(rp),
+                mime="application/pdf",
+                use_container_width=True
+            )
+            
+            st.info("💡 Téléchargez le rapport et ouvrez-le avec votre lecteur PDF pour le consulter.")
+        
         st.divider()
 
 st.markdown("---")

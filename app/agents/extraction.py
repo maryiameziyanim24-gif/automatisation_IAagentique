@@ -65,9 +65,9 @@ def _extract_article(sections: Dict[str, Any], doc: Optional[Dict[str, Any]] = N
     if not all_text and doc:
         all_text = " ".join([p.get("text", "") for p in doc.get("pages", [])[:3]]).lower()
     words = [w.strip(".,:;()[]{}\"'!?%") for w in all_text.split()]
-    words = [w for w in words if w and (w not in FR_STOPWORDS) and (w not in EN_STOPWORDS) and len(w) > 2]
-    common = [w for w, _ in Counter(words).most_common(15)]
-    data["mots_cles"] = common[:7]
+    words = [w for w in words if w and (w not in FR_STOPWORDS) and (w not in EN_STOPWORDS) and len(w) > 3]
+    common = [w for w, _ in Counter(words).most_common(30)]
+    data["mots_cles"] = common[:15]
     return data
 
 
@@ -128,12 +128,12 @@ def _extract_autre(sections: Dict[str, Any]) -> Dict[str, Any]:
     titles = [s.get("title", "").strip() for s in sections.get("sections", [])]
     text = _concat_sections_text(sections).lower()
     words = [w.strip(".,:;()[]{}\"'!?%") for w in text.split()]
-    words = [w for w in words if w and (w not in FR_STOPWORDS) and (w not in EN_STOPWORDS) and len(w) > 2]
-    common = [w for w, _ in Counter(words).most_common(20)]
+    words = [w for w in words if w and (w not in FR_STOPWORDS) and (w not in EN_STOPWORDS) and len(w) > 3]
+    common = [w for w, _ in Counter(words).most_common(40)]
     return {
         "sections_principales": titles[:10],
-        "points_cles": common[:10],
-        "mots_cles": common[:7],
+        "points_cles": common[:15],
+        "mots_cles": common[:20],
     }
 
 
